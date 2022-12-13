@@ -335,7 +335,7 @@ function H(a) {
   };
 }
 var G;
-G = "index.wasmgz";
+G = "index.wasm";
 if (!Za()) {
   var $a = G;
   G = h.locateFile ? h.locateFile($a, l) : l + $a;

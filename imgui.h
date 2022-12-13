@@ -24,6 +24,9 @@ void imgui_app(
     int ImGuiConfigFlags = 0
     );
 
+// Forward declaration for sapp_event
+struct sapp_event;
+
 // Called by imgui-app unless you override the event callback
 void imgui_app_event(const sapp_event* ev);
 

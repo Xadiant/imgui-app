@@ -3,5 +3,5 @@
 	url = https://github.com/ocornut/imgui.git
 [submodule "sokol"]
 	path = sokol
-	url = https://github.com/pplux/sokol.git
+	url = https://github.com/Xadiant/sokol
 	branch = opengl-version-select

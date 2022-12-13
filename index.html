@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+  
+    <link rel=icon type=image/png size=32x32 href=favicon32.png >
+    <link rel=icon type=image/png size=32x32 href=android-chrome-192x192.png >
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"/>
+    <title>TeraLink GUI v0.1</title>
+    <style>
+        body { margin: 0; background-color: black; }
+        .emscripten {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            margin: 0px;
+            border: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            display: block;
+            image-rendering: optimizeSpeed;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -o-crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest-neighbor;
+        }
+	.spinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            
+            margin-top: -20px;
+            margin-left: -20px;
+
+            height: 30px;
+            width: 30px;
+
+            -webkit-animation: rotation .8s linear infinite;
+            -moz-animation: rotation .8s linear infinite;
+            -o-animation: rotation .8s linear infinite;
+            animation: rotation 0.8s linear infinite;
+
+            border-left: 5px solid rgb(235, 235, 235);
+            border-right: 5px solid rgb(235, 235, 235);
+            border-bottom: 5px solid rgb(235, 235, 235);
+            border-top: 5px solid rgb(120, 120, 120);
+        
+            border-radius: 100%;
+            background-color: rgb(189, 215, 46);
+        }
+        .upload-form {
+            display: none;
+        }
+        .copyField {
+            width: '2em';
+            height: '2em';
+            padding: 0;
+            border: none;
+            outline: none;
+            background: transparent;
+            resize: none;
+            white-space: pre-wrap;
+        }
+
+        @-webkit-keyframes rotation {
+            from {-webkit-transform: rotate(0deg);}
+            to {-webkit-transform: rotate(360deg);}
+        }
+        @-moz-keyframes rotation {
+            from {-moz-transform: rotate(0deg);}
+            to {-moz-transform: rotate(360deg);}
+        }
+        @-o-keyframes rotation {
+            from {-o-transform: rotate(0deg);}
+            to {-o-transform: rotate(360deg);}
+        }
+        @keyframes rotation {
+            from {transform: rotate(0deg);}
+            to {transform: rotate(360deg);}
+        }
+    </style>
+    <script>
+        window.markerConfig = {
+            project: '639785a6fbac1c4f7af5fc27', 
+            source: 'snippet'
+        };
+    </script>
+
+    <script>
+        !function(e,r,a){if(!e.__Marker){e.__Marker={};var t=[],n={__cs:t};["show","hide","isVisible","capture","cancelCapture","unload","reload","isExtensionInstalled","setReporter","setCustomData","on","off"].forEach(function(e){n[e]=function(){var r=Array.prototype.slice.call(arguments);r.unshift(e),t.push(r)}}),e.Marker=n;var s=r.createElement("script");s.async=1,s.src="https://edge.marker.io/latest/shim.js";var i=r.getElementsByTagName("script")[0];i.parentNode.insertBefore(s,i)}}(window,document);
+    </script>
+  </head>
+  <body>
+    <div class="spinner" id='spinner'></div>
+    <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+
+    <form class="upload-form">
+        <input type="file" id="fileInput" multiple onchange="handleFiles(this.files)"></input>
+    </form>
+
+    <a href="" id="fileDownload" style="display: none;" download></a>
+
+    <textarea class="copyField" id="copyField"></textarea>
+
+    <script type='text/javascript'>
+        function handleDrop(e) {
+            var dt = e.dataTransfer;
+            var files = dt.files;
+            handleFiles(files);
+        }
+        function handleFiles(files) {
+            ([...files]).forEach(uploadFile);
+        }
+        function uploadFile(file) {
+            let uploadurl = "http://" + location.host + /upload/;
+            let formData = new FormData();
+
+            formData.append("file", file);
+
+            fetch(uploadurl, {
+                method: "POST",
+                body: formData
+            })
+            .then(() => { console.log("Uploaded: " + file.name); })
+            .catch(() => { console.log("Error uploading: " + file.name); })
+        }
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        let dropArea = document.getElementById("canvas")
+
+        // Prevent default drag behaviors
+        ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false)   
+            document.body.addEventListener(eventName, preventDefaults, false)
+        })
+
+        dropArea.addEventListener('drop', handleDrop, false)
+    </script>
+    <script type='text/javascript'>
+        function copyText() {
+            var copyTextInput = document.getElementById("copyField");
+            copyTextInput.focus();
+            copyTextInput.select();
+            copyTextInput.setSelectionRange(0, 99999);
+            document.execCommand("copy")
+            console.log("Ran browser copy.");
+        }
+    </script>
+    <script type='text/javascript'>
+      var Module = {
+        preRun: [],
+        postRun: [],
+        print: (function() {
+            return function(text) {
+                text = Array.prototype.slice.call(arguments).join(' ');
+                console.log(text);
+            };
+        })(),
+        printErr: function(text) {
+            text = Array.prototype.slice.call(arguments).join(' ');
+            console.error(text);
+        },
+        canvas: (function() {
+            var canvas = document.getElementById('canvas');
+            //canvas.addEventListener("webglcontextlost", function(e) { alert('FIXME: WebGL context lost, please reload the page'); e.preventDefault(); }, false);
+            return canvas;
+        })(),
+        setStatus: function(text) {
+            console.log("status: " + text);
+        },
+        totalDependencies: 0,
+        monitorRunDependencies: function(left) {
+            this.totalDependencies = Math.max(this.totalDependencies, left);
+            console.log("Deps: " + left + "/" + this.totalDependencies);
+
+            if (left == 0) {
+                document.getElementById('spinner').style.display = 'none';
+            }
+        }
+      };
+      Module.setStatus('Downloading...');
+      window.onerror = function() {
+        console.log("onerror: " + event);
+      };
+    </script>
+    <script async type="text/javascript" src="index.js"></script>
+  </body>
+</html>
+
+

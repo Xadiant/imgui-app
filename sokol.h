@@ -4,7 +4,7 @@
 // imgui:
 //    a8df192df022ed6ac447e7b7ada718c4c4824b41(Thu Nov 24 21:24:33 2022 +0100)
 // sokol:
-//    7cf434a922fe1bab285db96bf792f647b83314f7(Sun Nov 27 14:54:32 2022 +0100)
+//    1776998de341bc68b2e25aae6374f5fa3648f4ec(Tue Dec 13 14:25:30 2022 -0500)
 // ----------------------------------------------------------------------------
 #if defined(SOKOL_IMPL) && !defined(SOKOL_APP_IMPL)
 #define SOKOL_APP_IMPL
@@ -7569,7 +7569,7 @@ _SOKOL_PRIVATE void _sapp_win32_run(const sapp_desc* desc) {
             }
             else {
                 TranslateMessage(&msg);
-                DispatchMessage(&msg);
+                DispatchMessageW(&msg);
             }
         }
         _sapp_frame();
@@ -10284,6 +10284,7 @@ _SOKOL_PRIVATE void _sapp_x11_query_system_dpi(void) {
              consistent user experience (matches Qt, Gtk, etc), although not
              always the most accurate one
     */
+    bool dpi_ok = false;
     char* rms = XResourceManagerString(_sapp.x11.display);
     if (rms) {
         XrmDatabase db = XrmGetStringDatabase(rms);
@@ -10293,10 +10294,16 @@ _SOKOL_PRIVATE void _sapp_x11_query_system_dpi(void) {
             if (XrmGetResource(db, "Xft.dpi", "Xft.Dpi", &type, &value)) {
                 if (type && strcmp(type, "String") == 0) {
                     _sapp.x11.dpi = atof(value.addr);
+                    dpi_ok = true;
                 }
             }
             XrmDestroyDatabase(db);
         }
+    }
+    // fallback if querying DPI had failed: assume the standard DPI 96.0f
+    if (!dpi_ok) {
+        _sapp.x11.dpi = 96.0f;
+        SAPP_LOG("sokol_app.h: failed to query system dpi value, assuming default 96.0");
     }
 }
 
